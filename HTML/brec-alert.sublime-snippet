@@ -1,0 +1,13 @@
+<snippet>
+  <content><![CDATA[
+<div class="alert ${1:info}">
+  <span class="close"></span>
+  <i class="icon-${2:info-sign}"></i>
+  <strong>${3:Alert Title}</strong> ${4:Alert Text}
+</div>
+]]></content>
+  <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+  <tabTrigger>brecalert</tabTrigger>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope>source.python</scope> -->
+</snippet>

@@ -1,0 +1,14 @@
+<snippet>
+  <content><![CDATA[
+  <div class="pagination">
+    <a class="pagination-link pagination-link--prev">Prev</a>
+    <a class="pagination-link" href="#">1</a>
+    <a class="pagination-link pagination-link--current" href="#">2</a>
+    <a class="pagination-link pagination-link--next" href="#">Next</a>
+  </div>
+]]></content>
+  <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+  <tabTrigger>brecpage</tabTrigger>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope>text.html</scope> -->
+</snippet>

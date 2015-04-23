@@ -1,0 +1,20 @@
+<snippet>
+  <content><![CDATA[
+    <div class="modal modal-${1:small}" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" tabindex="-1">
+     <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-heading" id="myModalLabel">${2:Modal Header}</h2>
+          <a href="#" title="Modal Close" aria-label="Close" class="modal-close"><span aria-hidden="true" class="fa fa-remove fa-lg"></span> Close</a>
+        </div>
+        <div class="modal-body">
+          ${3:Modal Body}
+          <div class="modal-footer">${4:Modal Footer}</div>
+        </div>
+      </div>
+    </div>
+]]></content>
+  <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+  <tabTrigger>brecmodal</tabTrigger>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope>source.python</scope> -->
+</snippet>
