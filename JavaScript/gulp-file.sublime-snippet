@@ -1,0 +1,143 @@
+<snippet>
+  <content><![CDATA[
+'use strict';
+var gulp = require('gulp');
+var gulpLoadPlugins = require('gulp-load-plugins');
+var \$ = gulpLoadPlugins({});
+var log = require('color-log');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var watchify = require('watchify');
+var browserify = require('browserify');
+var runSequence = require('run-sequence');
+var brec = require('brec/src/main/index');
+var path = require('path');
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
+
+var paths = {
+  app: 'app',
+  scripts: 'scripts',
+  styles: 'styles',
+  sass: 'sass',
+  fonts: 'fonts',
+  templates: 'scripts/**/templates',
+  i18n: 'i18n',
+  dist: 'dist'
+};
+
+/* Browserify bundler */
+watchify.args.debug = (\$.util.env.type !== 'production');
+var browserifyBundler = browserify(watchify.args);
+
+/* Clean the paths.dist directory */
+gulp.task('clean', function() {
+  return gulp.src(paths.dist, {read: false})
+    .pipe(\$.rimraf());
+});
+
+/* Copy all resources to dist */
+var copyResources = function() {
+  // TODO: no js
+  log.mark('Copying resources...');
+  return gulp.src([
+      paths.app + '/**/*.*',
+      '!' + paths.app + '/**/*.+(hbs|js|scss)',
+    ])
+    .pipe(gulp.dest(paths.dist))
+    .pipe(\$.util.env.type !== 'production' ? browserSync.reload({stream: true}) : '');
+};
+gulp.task('copy-resources', copyResources);
+
+/* Build all styles */
+var buildStyles = function() {
+  return gulp.src([paths.app + '/' + paths.styles + '/**/*.scss'])
+  .pipe(\$.sass({
+    includePaths: [brec.sass],
+    onSuccess: function(err) {
+      log.mark('[SUCCESS] {Sass} ' + err.css.length + ' bytes written (' + (err.stats.duration / 1000.0) + ' seconds)');
+    },
+    onError: function(err) {
+      log.error('[ERROR] {Sass} @ ' + (new Date()));
+      log.warn('Message: ' + err.message);
+      log.warn('in file --> ' + err.file);
+    }
+  }))
+  .pipe(\$.autoprefixer())
+  .pipe(\$.util.env.type === 'production' ? \$.cssmin() : \$.util.noop())
+  .pipe(gulp.dest(paths.dist + '/' + paths.styles))
+  .pipe(\$.util.env.type !== 'production' ? browserSync.reload({stream: true}) : '');
+};
+gulp.task('build-styles', buildStyles);
+
+/* Reduce all javascript to app.js */
+var buildApp = function() {
+  return browserifyBundler.bundle()
+    .on('error', function(err, b) {
+      delete err.stream;
+      log.error('[ERROR] {Browserify} @ ' + (new Date()));
+      log.warn(err.toString());
+      return true;
+    })
+    .pipe(source('app.js'))
+    .pipe(\$.util.env.type !== 'production' ? buffer() : \$.util.noop())
+    .pipe(\$.util.env.type !== 'production' ? \$.sourcemaps.init({loadMaps: true}) : \$.util.noop())
+    .pipe(\$.util.env.type === 'production' ? \$.uglify() : \$.util.noop())
+    .pipe(\$.util.env.type !== 'production' ? \$.sourcemaps.write('./') : \$.util.noop())
+    .pipe(gulp.dest(paths.dist + '/' + paths.scripts))
+    .pipe(\$.util.env.type !== 'production' ? browserSync.reload({stream: true}) : '');
+};
+gulp.task('build-app', buildApp);
+
+/* Full build */
+gulp.task('build', function(callback) {
+  browserifyBundler.add('./app/scripts/main');
+  browserifyBundler.transform('aliasify');
+  browserifyBundler.transform('hbsfy');
+  runSequence('clean',
+    [
+      'copy-resources',
+      'build-styles',
+      'build-app'
+    ],
+    callback);
+});
+
+/* Run once at begining of dev */
+gulp.task('fonts', function() {
+  return gulp.src(brec.fonts)
+    .pipe(gulp.dest(paths.app + '/' + paths.fonts));
+});
+
+/* Start the server */
+gulp.task('serve', function() {
+    browserSync({
+        server: {
+            baseDir: "./dist/",
+        },
+        open: false
+    });
+});
+
+/* Watch build */
+gulp.task('watch', function() {
+  browserifyBundler = watchify(browserifyBundler);
+  browserifyBundler.on('update', buildApp);
+  browserifyBundler.on('log', function(err) {
+    log.mark('[SUCCESS] {Javascript} ' + err.toString());
+  });
+  gulp.start('serve');
+  gulp.start('build', function() {
+    gulp.watch(paths.app + '/' + paths.styles + '/**/*.scss', buildStyles);
+    gulp.watch([
+      paths.app + '/**/*.*',
+      '!' + paths.app + '/**/*.+(hbs|js|scss)',
+    ], copyResources);
+  });
+});
+]]></content>
+  <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+  <tabTrigger>gulpfile</tabTrigger>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope>source.python</scope> -->
+</snippet>
