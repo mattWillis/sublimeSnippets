@@ -1,5 +1,16 @@
 <snippet>
   <content><![CDATA[
+'use strict';
+
+var \$ = require('jquery');
+var _ = require('underscore');
+var Handlebars = require('hbsfy/runtime');
+var Backbone = require('backbone');
+var Torso = require('backbone-torso');
+
+Backbone.\$ = \$;
+Torso.\$ = \$;
+
 module.exports = Torso.Views.View.extend({
   ${1}
 });
